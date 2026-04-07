@@ -16,6 +16,5 @@ Custom Google Chrome Plugin to pin part of a webpage for reference in real time
                 - popup.js sends a message to → content.js
                                 (which lives inside the webpage)
                                 draws lines, scrolls, shows HUD
-
-- Your keyboard shortcut hits → background.js
+        - Your keyboard shortcut hits → background.js
                                 which forwards it to → content.js

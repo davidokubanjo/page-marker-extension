@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Page Marker</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap');
+
+    :root {
+      --bg: #f7f9fc;
+      --surface: #ffffff;
+      --surface2: #eef2f7;
+      --border: #dde4ee;
+      --text: #2d3748;
+      --text-muted: #8896aa;
+      --blue: #63b3ed;
+      --blue-soft: rgba(99,179,237,0.12);
+      --blue-border: rgba(99,179,237,0.28);
+      --green: #48bb78;
+      --red: #e05252;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 260px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 12px 9px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .header-icon { font-size: 15px; }
+    .header-text h1 { font-size: 13px; font-weight: 800; line-height: 1; }
+    .header-text p {
+      font-size: 9px; color: var(--text-muted);
+      font-family: 'Space Mono', monospace;
+      margin-top: 1px; letter-spacing: 0.7px;
+    }
+    .header-count {
+      margin-left: auto;
+      font-family: 'Space Mono', monospace; font-size: 9px;
+      color: var(--text-muted);
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 2px 7px; flex-shrink: 0;
+    }
+    .header-count.has-marks {
+      background: var(--blue-soft); border-color: var(--blue-border);
+      color: var(--blue);
+    }
+
+    /* ── Nav row: Prev / Next ── */
+    .nav-row {
+      display: flex;
+      gap: 5px;
+      padding: 8px 10px 0;
+    }
+    .btn-nav {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 7px 6px;
+      font-family: 'Syne', sans-serif;
+      font-size: 11px; font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+    }
+    .btn-nav:disabled { opacity: 0.32; cursor: not-allowed; }
+    .btn-nav:not(:disabled):hover { border-color: var(--blue); color: var(--blue); }
+    .btn-nav:not(:disabled):active { transform: scale(0.96); }
+
+    .nav-hint {
+      text-align: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 8px;
+      color: var(--text-muted);
+      padding: 3px 10px 0;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px; background: var(--border);
+      margin: 8px 10px 0;
+    }
+
+    /* ── Add mark row ── */
+    .add-row {
+      display: flex; gap: 5px;
+      padding: 8px 10px 0;
+    }
+    .add-row input {
+      flex: 1; min-width: 0;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 6px 8px;
+      font-family: 'Syne', sans-serif; font-size: 11px;
+      color: var(--text); outline: none;
+      transition: border-color 0.2s;
+    }
+    .add-row input::placeholder { color: var(--text-muted); }
+    .add-row input:focus { border-color: var(--blue); }
+
+    .btn-add {
+      flex-shrink: 0;
+      background: var(--blue); color: #fff;
+      border: none; border-radius: 6px;
+      padding: 6px 10px;
+      font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 4px;
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn-add:hover { background: #4da3e0; }
+    .btn-add:active { transform: scale(0.96); }
+
+    /* ── Marks list ── */
+    .marks-list {
+      padding: 7px 10px 0;
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .marks-list::-webkit-scrollbar { width: 4px; }
+    .marks-list::-webkit-scrollbar-track { background: transparent; }
+    .marks-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── Mark row ── */
+    .mark-row {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 7px; padding: 6px 8px;
+      transition: border-color 0.15s;
+    }
+    .mark-row:hover { border-color: var(--mark-color, var(--blue)); }
+    .mark-row.is-current { border-color: var(--mark-color, var(--blue)); background: var(--surface2); }
+
+    .mark-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .mark-info { flex: 1; min-width: 0; }
+    .mark-name {
+      font-size: 11px; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      line-height: 1.2;
+    }
+    .mark-pos {
+      font-family: 'Space Mono', monospace; font-size: 9px;
+      color: var(--text-muted); margin-top: 1px;
+    }
+    .mark-actions { display: flex; gap: 3px; flex-shrink: 0; }
+
+    .btn-icon {
+      background: none; border: 1px solid var(--border);
+      border-radius: 5px; width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 11px;
+      transition: background 0.15s, border-color 0.15s; padding: 0;
+    }
+    .btn-icon.jump:hover { background: var(--blue-soft); border-color: var(--blue); }
+    .btn-icon.del:hover  { background: rgba(224,82,82,0.08); border-color: var(--red); }
+
+    /* ── Empty state ── */
+    .empty-state {
+      padding: 16px 12px 8px; text-align: center;
+    }
+    .empty-state p {
+      font-family: 'Space Mono', monospace; font-size: 9px;
+      color: var(--text-muted); line-height: 1.8; letter-spacing: 0.3px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 6px 10px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 8px;
+    }
+    .footer p {
+      font-family: 'Space Mono', monospace; font-size: 8px;
+      color: var(--text-muted);
+    }
+    .btn-clear-all {
+      background: none; border: none;
+      font-family: 'Space Mono', monospace; font-size: 8px;
+      color: var(--red); cursor: pointer;
+      padding: 2px 4px; border-radius: 4px;
+      opacity: 0.7; transition: opacity 0.15s;
+    }
+    .btn-clear-all:hover { opacity: 1; }
+    .btn-clear-all:disabled { opacity: 0.25; cursor: not-allowed; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 26px; left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      background: var(--text); color: #fff;
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      padding: 5px 12px; border-radius: 12px;
+      opacity: 0; transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none; white-space: nowrap; z-index: 99;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-icon">📍</div>
+    <div class="header-text">
+      <h1>Page Marker</h1>
+      <p>Multi-mark edition</p>
+    </div>
+    <div class="header-count" id="headerCount">0 marks</div>
+  </div>
+
+  <!-- Prev / Next navigation -->
+  <div class="nav-row">
+    <button class="btn-nav" id="btnPrev" disabled>⬆ Prev mark</button>
+    <button class="btn-nav" id="btnNext" disabled>Next mark ⬇</button>
+  </div>
+  <div class="nav-hint">or use <strong>Alt+,</strong> / <strong>Alt+.</strong> on the page</div>
+
+  <div class="divider"></div>
+
+  <!-- Add new mark -->
+  <div class="add-row">
+    <input type="text" id="markLabel" placeholder="Label (optional)" maxlength="40" />
+    <button class="btn-add" id="btnAdd">+ Place</button>
+  </div>
+
+  <!-- Marks list -->
+  <div class="marks-list" id="marksList"></div>
+
+  <div class="empty-state" id="emptyState">
+    <p>No marks yet.<br/>Type a label and click<br/>"Place" to drop one.</p>
+  </div>
+
+  <div class="footer">
+    <p>Marks persist across reloads</p>
+    <button class="btn-clear-all" id="btnClearAll" disabled>Clear all</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

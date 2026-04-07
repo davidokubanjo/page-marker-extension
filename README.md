@@ -6,7 +6,7 @@ Custom Google Chrome Plugin to pin part of a webpage for reference in real time
 - Open Google Chrome and go to chrome://extensions/ > Toggle Developer mode on (top-right) > Click "Load unpacked" > Select the page-marker-extension folder
 
 
-- Logic Behind how this works
+## Logic Behind how this works
 
 You click the toolbar icon
         ↓
